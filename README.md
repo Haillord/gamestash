@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon/banner.png" width="100%" alt="GameStash Banner">
+  <img src="banner.png" width="100%" alt="GameStash Banner">
 </p>
 
 <p align="center">
