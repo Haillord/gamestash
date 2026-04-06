@@ -1,6 +1,6 @@
 <table>
 <tr>
-<td width="32" valign="top"><img src="neon_left.gif" width="32"></td>
+<td width="16" valign="top"><img src="neon_left.gif" width="16"></td>
 <td>
 
 <p align="center">
@@ -102,6 +102,6 @@ flutter run
 </p>
 
 </td>
-<td width="32" valign="top"><img src="neon_right.gif" width="32"></td>
+<td width="16" valign="top"><img src="neon_right.gif" width="16"></td>
 </tr>
 </table>
