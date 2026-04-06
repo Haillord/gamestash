@@ -3,9 +3,10 @@ from PIL import Image, ImageDraw, ImageFilter
 import colorsys
 
 # Параметры
-WIDTH = 16
-HEIGHT = 2000
-FRAMES = 120
+WIDTH = 10
+HEIGHT = 5000
+FRAMES = 90
+COLOR = (255, 59, 48)  # Красный iOS стиль
 
 frames_left = []
 frames_right = []
@@ -14,12 +15,7 @@ for i in range(FRAMES):
     phase = i * (np.pi * 2 / FRAMES)
     
     # Пульсация яркости
-    brightness = 0.65 + 0.35 * np.sin(phase)
-    
-    # Плавный перелив цвета по всему спектру
-    hue = i / FRAMES
-    r, g, b = colorsys.hsv_to_rgb(hue, 0.85, 1.0)
-    COLOR = (int(r*255), int(g*255), int(b*255))
+    brightness = 0.7 + 0.3 * np.sin(phase)
     
     # Создаем изображение
     img = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
