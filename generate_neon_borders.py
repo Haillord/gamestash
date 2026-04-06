@@ -3,8 +3,8 @@ from PIL import Image, ImageDraw, ImageFilter
 import colorsys
 
 # Параметры
-WIDTH = 10
-HEIGHT = 3000
+WIDTH = 16
+HEIGHT = 2400
 FRAMES = 90
 
 frames_left = []
