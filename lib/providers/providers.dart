@@ -6,6 +6,7 @@ import '../services/torrent_service.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show compute;
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui' show PlatformDispatcher;
 import 'package:game_stash/models/feed_state.dart';
@@ -143,10 +144,12 @@ final connectionStatusProvider =
       return ConnectionNotifier();
     });
 
-class ConnectionNotifier extends StateNotifier<ConnectionStatus> {
+class ConnectionNotifier extends StateNotifier<ConnectionStatus> with WidgetsBindingObserver {
   Timer? _timer;
+  bool _isChecking = false;
 
   ConnectionNotifier() : super(ConnectionStatus.checking) {
+    WidgetsBinding.instance.addObserver(this);
     check();
     // Увеличен интервал с 30с до 60с — меньше фоновых HTTP запросов,
     // меньше лишних ребилдов UI.
@@ -154,21 +157,38 @@ class ConnectionNotifier extends StateNotifier<ConnectionStatus> {
   }
 
   Future<void> check() async {
-    // Не переходим в checking если уже connected — это убирает лишний
-    // setState (checking → connected) каждые 60 секунд у всех подписчиков.
-    if (state != ConnectionStatus.connected) {
-      state = ConnectionStatus.checking;
+    if (_isChecking) return;
+    _isChecking = true;
+
+    try {
+      // Не переходим в checking если уже connected — это убирает лишний
+      // setState (checking → connected) каждые 60 секунд у всех подписчиков.
+      if (state != ConnectionStatus.connected) {
+        state = ConnectionStatus.checking;
+      }
+      // Запускаем HTTP проверку в отдельном изоляте чтобы не блокировать UI.
+      final status = await compute(_checkConnectionIsolate, null);
+      if (mounted && status != state) {
+        // Обновляем state только если статус реально изменился.
+        state = status;
+      }
+    } finally {
+      _isChecking = false;
     }
-    // Запускаем HTTP проверку в отдельном изоляте чтобы не блокировать UI.
-    final status = await compute(_checkConnectionIsolate, null);
-    if (mounted && status != state) {
-      // Обновляем state только если статус реально изменился.
-      state = status;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // При возвращении приложения из фона/блокировки
+      // Делаем небольшую задержку чтобы ОС успела восстановить сетевой стек
+      Future.delayed(const Duration(milliseconds: 300), check);
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
